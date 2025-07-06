@@ -1,15 +1,15 @@
-
 import { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, startOfWeek, endOfWeek, addMinutes } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, MapPin, Users, Plus } from 'lucide-react';
+import { Clock, MapPin, Users, Plus, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Session {
   id: string;
   trainerId: string;
+  trainerName?: string;
   courseName: string;
   date: Date;
   duration: number;
@@ -147,6 +147,11 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
                     <div className="font-medium truncate mb-1">
                       {session.courseName}
                     </div>
+                    {session.trainerName && (
+                      <div className="text-xs opacity-75 truncate mb-1">
+                        {session.trainerName}
+                      </div>
+                    )}
                     <div className="flex items-center space-x-1 text-xs opacity-75">
                       <Clock className="w-3 h-3" />
                       <span>{format(session.date, 'h:mm a')}</span>
@@ -173,6 +178,16 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
           {selectedSession && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
+                {selectedSession.trainerName && (
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <User className="w-5 h-5 text-indigo-600" />
+                    <div>
+                      <p className="font-medium">Trainer</p>
+                      <p className="text-sm text-gray-600">{selectedSession.trainerName}</p>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <Clock className="w-5 h-5 text-blue-600" />
                   <div>

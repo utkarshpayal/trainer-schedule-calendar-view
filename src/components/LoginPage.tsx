@@ -4,11 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, User, Lock } from 'lucide-react';
+import { Calendar, User, Lock, Shield } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface LoginPageProps {
-  onLogin: (user: { id: string; name: string; email: string }) => void;
+  onLogin: (user: { id: string; name: string; email: string; role: 'trainer' | 'admin' }) => void;
 }
 
 const LoginPage = ({ onLogin }: LoginPageProps) => {
@@ -16,11 +16,12 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Demo trainers for testing
-  const demoTrainers = [
-    { id: '1', name: 'Sarah Johnson', email: 'sarah@trainingcenter.com', password: 'demo123' },
-    { id: '2', name: 'Mike Chen', email: 'mike@trainingcenter.com', password: 'demo123' },
-    { id: '3', name: 'Lisa Rodriguez', email: 'lisa@trainingcenter.com', password: 'demo123' }
+  // Demo trainers and admin for testing
+  const demoUsers = [
+    { id: '1', name: 'Sarah Johnson', email: 'sarah@trainingcenter.com', password: 'demo123', role: 'trainer' as const },
+    { id: '2', name: 'Mike Chen', email: 'mike@trainingcenter.com', password: 'demo123', role: 'trainer' as const },
+    { id: '3', name: 'Lisa Rodriguez', email: 'lisa@trainingcenter.com', password: 'demo123', role: 'trainer' as const },
+    { id: 'admin', name: 'Admin User', email: 'admin@trainingcenter.com', password: 'admin123', role: 'admin' as const }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,14 +32,14 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Demo authentication logic
-    const trainer = demoTrainers.find(t => t.email === email && t.password === password);
+    const user = demoUsers.find(u => u.email === email && u.password === password);
     
-    if (trainer) {
+    if (user) {
       toast({
         title: "Login Successful",
-        description: `Welcome back, ${trainer.name}!`,
+        description: `Welcome back, ${user.name}!`,
       });
-      onLogin({ id: trainer.id, name: trainer.name, email: trainer.email });
+      onLogin({ id: user.id, name: user.name, email: user.email, role: user.role });
     } else {
       toast({
         title: "Login Failed",
@@ -112,12 +113,27 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
             </form>
 
             {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-blue-900 mb-2">Demo Credentials:</h3>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p><strong>Sarah:</strong> sarah@trainingcenter.com / demo123</p>
-                <p><strong>Mike:</strong> mike@trainingcenter.com / demo123</p>
-                <p><strong>Lisa:</strong> lisa@trainingcenter.com / demo123</p>
+            <div className="mt-6 space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-medium text-blue-900 mb-2 flex items-center">
+                  <User className="w-4 h-4 mr-2" />
+                  Trainer Credentials:
+                </h3>
+                <div className="text-sm text-blue-800 space-y-1">
+                  <p><strong>Sarah:</strong> sarah@trainingcenter.com / demo123</p>
+                  <p><strong>Mike:</strong> mike@trainingcenter.com / demo123</p>
+                  <p><strong>Lisa:</strong> lisa@trainingcenter.com / demo123</p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <h3 className="font-medium text-purple-900 mb-2 flex items-center">
+                  <Shield className="w-4 h-4 mr-2" />
+                  Admin Access:
+                </h3>
+                <div className="text-sm text-purple-800">
+                  <p><strong>Admin:</strong> admin@trainingcenter.com / admin123</p>
+                </div>
               </div>
             </div>
           </CardContent>
