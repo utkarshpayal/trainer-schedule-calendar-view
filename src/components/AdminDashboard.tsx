@@ -1,25 +1,12 @@
+
 import { useState } from 'react';
 import { format, addMonths, subMonths, startOfWeek, addDays } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Calendar, 
-  ChevronLeft, 
-  ChevronRight, 
-  LogOut, 
-  Users, 
-  BookOpen, 
-  Clock,
-  Shield,
-  Eye,
-  Filter,
-  Plus
-} from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import CalendarView from './CalendarView';
-import AdminStatsCard from './AdminStatsCard';
-import TrainerSelector from './TrainerSelector';
+import AdminHeader from './AdminHeader';
+import AdminStats from './AdminStats';
+import AdminControls from './AdminControls';
 import AddSessionDialog from './AddSessionDialog';
 
 interface User {
@@ -171,136 +158,30 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
     }
   };
 
-  const totalSessions = filteredSessions.length;
-  const confirmedSessions = filteredSessions.filter(s => s.status === 'Confirmed').length;
-  const totalParticipants = filteredSessions.reduce((sum, s) => sum + s.participants, 0);
-  const uniqueTrainers = selectedTrainer === 'all' ? trainers.length : 1;
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Shield className="w-8 h-8 text-purple-600" />
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">Admin Portal</h1>
-                  <p className="text-sm text-gray-500">Training Center Management</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                <p className="text-xs text-gray-500">Administrator</p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onLogout}
-                className="flex items-center space-x-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminHeader user={user} onLogout={onLogout} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <AdminStatsCard
-            title="Total Sessions"
-            value={totalSessions}
-            icon={BookOpen}
-            color="blue"
-          />
-          <AdminStatsCard
-            title="Confirmed Sessions"
-            value={confirmedSessions}
-            icon={Calendar}
-            color="green"
-          />
-          <AdminStatsCard
-            title="Total Participants"
-            value={totalParticipants}
-            icon={Users}
-            color="purple"
-          />
-          <AdminStatsCard
-            title="Active Trainers"
-            value={uniqueTrainers}
-            icon={Eye}
-            color="orange"
-          />
-        </div>
+        <AdminStats 
+          sessions={filteredSessions} 
+          trainers={trainers} 
+          selectedTrainer={selectedTrainer} 
+        />
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-2xl font-bold text-gray-900">Training Schedule</h2>
-            <TrainerSelector
-              trainers={trainers}
-              selectedTrainer={selectedTrainer}
-              onTrainerChange={setSelectedTrainer}
-            />
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Button
-              onClick={() => setShowAddDialog(true)}
-              className="flex items-center space-x-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Session</span>
-            </Button>
-            
-            <div className="flex items-center space-x-2 bg-white rounded-lg border p-1">
-              <Button
-                variant={view === 'month' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setView('month')}
-                className="text-xs"
-              >
-                Month
-              </Button>
-              <Button
-                variant={view === 'week' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setView('week')}
-                className="text-xs"
-              >
-                Week
-              </Button>
-            </div>
-            
-            <div className="flex items-center space-x-2 bg-white rounded-lg border px-3 py-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleNavigation('prev')}
-                className="p-1 h-8 w-8"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-medium min-w-[140px] text-center">
-                {getDateRangeText()}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleNavigation('next')}
-                className="p-1 h-8 w-8"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
+        <AdminControls
+          trainers={trainers}
+          selectedTrainer={selectedTrainer}
+          onTrainerChange={setSelectedTrainer}
+          onAddSession={() => setShowAddDialog(true)}
+          view={view}
+          onViewChange={setView}
+          dateRangeText={getDateRangeText()}
+          onNavigate={handleNavigation}
+        />
 
         {/* Calendar */}
         <Card>
