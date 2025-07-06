@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { format, addMonths, subMonths, startOfWeek, addDays } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,11 +14,13 @@ import {
   Clock,
   Shield,
   Eye,
-  Filter
+  Filter,
+  Plus
 } from 'lucide-react';
 import CalendarView from './CalendarView';
 import AdminStatsCard from './AdminStatsCard';
 import TrainerSelector from './TrainerSelector';
+import AddSessionDialog from './AddSessionDialog';
 
 interface User {
   id: string;
@@ -49,9 +50,10 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'month' | 'week'>('month');
   const [selectedTrainer, setSelectedTrainer] = useState<string>('all');
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   // Mock data for all trainers' sessions
-  const allSessions: Session[] = [
+  const [allSessions, setAllSessions] = useState<Session[]>([
     {
       id: '1',
       trainerId: '1',
@@ -118,7 +120,7 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
       participants: 12,
       status: 'Confirmed'
     }
-  ];
+  ]);
 
   const trainers = [
     { id: '1', name: 'Sarah Johnson' },
@@ -130,6 +132,14 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
   const filteredSessions = selectedTrainer === 'all' 
     ? allSessions 
     : allSessions.filter(session => session.trainerId === selectedTrainer);
+
+  const handleAddSession = (newSession: Omit<Session, 'id'>) => {
+    const sessionWithId = {
+      ...newSession,
+      id: Date.now().toString()
+    };
+    setAllSessions(prev => [...prev, sessionWithId]);
+  };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => 
@@ -241,6 +251,14 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
           </div>
           
           <div className="flex items-center space-x-3">
+            <Button
+              onClick={() => setShowAddDialog(true)}
+              className="flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Session</span>
+            </Button>
+            
             <div className="flex items-center space-x-2 bg-white rounded-lg border p-1">
               <Button
                 variant={view === 'month' ? 'default' : 'ghost'}
@@ -309,6 +327,12 @@ const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
           </CardContent>
         </Card>
       </div>
+
+      <AddSessionDialog
+        open={showAddDialog}
+        onClose={() => setShowAddDialog(false)}
+        onAddSession={handleAddSession}
+      />
     </div>
   );
 };
