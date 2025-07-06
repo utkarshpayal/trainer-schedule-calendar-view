@@ -1,10 +1,10 @@
 
 import { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, startOfWeek, endOfWeek, addMinutes } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, MapPin, Users } from 'lucide-react';
+import { Clock, MapPin, Users, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Session {
@@ -26,6 +26,7 @@ interface CalendarViewProps {
 
 const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const getCalendarDays = () => {
     if (view === 'week') {
@@ -46,11 +47,12 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
   };
 
   const getDayClasses = (day: Date) => {
-    const baseClasses = "min-h-[120px] p-2 border border-gray-100 transition-colors hover:bg-gray-50";
+    const baseClasses = "min-h-[120px] p-2 border border-gray-100 transition-colors hover:bg-gray-50 cursor-pointer";
     const todayClasses = isToday(day) ? "bg-blue-50 border-blue-200" : "";
     const otherMonthClasses = day.getMonth() !== currentDate.getMonth() ? "text-gray-400 bg-gray-50/50" : "";
+    const selectedClasses = selectedDate && isSameDay(day, selectedDate) ? "ring-2 ring-blue-500" : "";
     
-    return cn(baseClasses, todayClasses, otherMonthClasses);
+    return cn(baseClasses, todayClasses, otherMonthClasses, selectedClasses);
   };
 
   const getSessionColor = (courseName: string) => {
@@ -71,6 +73,25 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
     return colors[Math.abs(hash) % colors.length];
   };
 
+  const handleDateClick = (day: Date) => {
+    setSelectedDate(day);
+    const daySessions = getSessionsForDay(day);
+    if (daySessions.length === 1) {
+      setSelectedSession(daySessions[0]);
+    }
+    console.log(`Date clicked: ${format(day, 'PPP')}, Sessions: ${daySessions.length}`);
+  };
+
+  const handleSessionClick = (session: Session, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent date click handler from firing
+    setSelectedSession(session);
+    console.log(`Session clicked: ${session.courseName}`);
+  };
+
+  const getSessionEndTime = (session: Session) => {
+    return addMinutes(session.date, session.duration);
+  };
+
   const calendarDays = getCalendarDays();
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -89,7 +110,11 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
           const daySessions = getSessionsForDay(day);
           
           return (
-            <div key={index} className={getDayClasses(day)}>
+            <div 
+              key={index} 
+              className={getDayClasses(day)}
+              onClick={() => handleDateClick(day)}
+            >
               <div className="flex justify-between items-start mb-2">
                 <span className={cn(
                   "text-sm font-medium",
@@ -97,11 +122,16 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
                 )}>
                   {format(day, 'd')}
                 </span>
-                {daySessions.length > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {daySessions.length}
-                  </Badge>
-                )}
+                <div className="flex items-center space-x-1">
+                  {daySessions.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {daySessions.length}
+                    </Badge>
+                  )}
+                  {daySessions.length === 0 && (
+                    <Plus className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </div>
               </div>
               
               <div className="space-y-1">
@@ -109,10 +139,10 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
                   <div
                     key={session.id}
                     className={cn(
-                      "p-2 rounded text-xs cursor-pointer border transition-all hover:scale-105",
+                      "p-2 rounded text-xs cursor-pointer border transition-all hover:scale-105 hover:shadow-sm",
                       getSessionColor(session.courseName)
                     )}
-                    onClick={() => setSelectedSession(session)}
+                    onClick={(e) => handleSessionClick(session, e)}
                   >
                     <div className="font-medium truncate mb-1">
                       {session.courseName}
@@ -123,6 +153,11 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
                     </div>
                   </div>
                 ))}
+                {daySessions.length === 0 && (
+                  <div className="text-xs text-gray-400 text-center py-2 opacity-0 hover:opacity-100 transition-opacity">
+                    No sessions
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -143,7 +178,7 @@ const CalendarView = ({ currentDate, sessions, view }: CalendarViewProps) => {
                   <div>
                     <p className="font-medium">{format(selectedSession.date, 'EEEE, MMMM do')}</p>
                     <p className="text-sm text-gray-600">
-                      {format(selectedSession.date, 'h:mm a')} - {format(addDays(selectedSession.date, 0), 'h:mm a')}
+                      {format(selectedSession.date, 'h:mm a')} - {format(getSessionEndTime(selectedSession), 'h:mm a')}
                     </p>
                   </div>
                 </div>
