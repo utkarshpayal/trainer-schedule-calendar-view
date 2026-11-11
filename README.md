@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# Trainer Schedule – Calendar View
 
-## Project info
+A training-center scheduling portal with separate views for **trainers** and **administrators**. Trainers sign in to see their own sessions on a calendar; admins see every trainer's schedule, filter by trainer, view summary stats and add new sessions.
 
-**URL**: https://lovable.dev/projects/a9bedd87-67da-4acb-b548-06047694232d
+> **Status:** front-end prototype. Login uses hard-coded demo accounts, and sessions are mock data held in React state (new sessions are lost on reload). There is no backend or persistence.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+### Login
+- Email/password sign-in form (`src/components/LoginPage.tsx`) that routes the user to the trainer or admin view based on role.
+- Demo accounts (three trainers and one admin) are shown on the login screen and defined in `LoginPage.tsx`.
 
-**Use Lovable**
+### Trainer dashboard (`Dashboard.tsx`)
+- Stats: total sessions, sessions this month, total hours and students.
+- "Today's Sessions" and "Upcoming" (next 7 days) lists.
+- Month/week calendar (`CalendarView.tsx`) with previous/next navigation; clicking a session opens a details dialog (date, time, duration, location, participants, status, trainer).
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a9bedd87-67da-4acb-b548-06047694232d) and start prompting.
+### Admin dashboard (`AdminDashboard.tsx`)
+- Header with admin identity and logout (`AdminHeader.tsx`).
+- Stats cards: total sessions, active trainers, confirmed sessions, total participants (`AdminStats.tsx`).
+- Trainer filter (`TrainerSelector.tsx`) and month/week calendar of all sessions.
+- "Add Session" dialog (`AddSessionDialog.tsx`) with course name, trainer, date, time, duration, location, participants and status (confirmed / pending / cancelled).
 
-Changes made via Lovable will be committed automatically to this repo.
+## Tech stack
 
-**Use your preferred IDE**
+- [Vite](https://vitejs.dev/) + React 18 + TypeScript
+- [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/) (Radix UI primitives) in `src/components/ui`
+- date-fns, lucide-react icons, React Router, TanStack Query provider
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requirements: Node.js and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The dev server is configured in `vite.config.ts` to listen on port **8080**. Sign in with one of the demo accounts listed on the login page.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Scripts
 
-**Use GitHub Codespaces**
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Production build into `dist/` |
+| `npm run build:dev` | Build using development mode |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+No test script is configured.
 
-## What technologies are used for this project?
+## Configuration
 
-This project is built with:
+No environment variables are used.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Project structure
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/a9bedd87-67da-4acb-b548-06047694232d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```
+src/
+  pages/Index.tsx   # Shows LoginPage, trainer Dashboard or AdminDashboard based on the signed-in user
+  components/       # LoginPage, Dashboard, AdminDashboard, CalendarView, AddSessionDialog, Admin* widgets, TrainerSelector
+  components/ui/    # shadcn/ui components
+```
